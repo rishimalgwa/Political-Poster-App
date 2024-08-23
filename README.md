@@ -1,4 +1,4 @@
-# political_poster_app
+# Political Poster App
 
 A Political Poster Maker app in Flutter.
 
