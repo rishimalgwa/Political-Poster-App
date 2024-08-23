@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:political_poster_app/src/common/contants/asstes_path.dart';
 import 'package:political_poster_app/src/common/helpers/size.dart';
 import 'package:political_poster_app/src/common/utils/phone_validation.dart';
 import 'package:political_poster_app/src/common/widgets/button.dart';
@@ -28,10 +30,28 @@ class _PhonePageState extends State<PhonePage> {
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Placeholder(
-                fallbackHeight: SizeHelper(context).hHelper(30),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    SvgPicture.asset(
+                      politicalCandidatePath,
+                      width: 200,
+                      height: 200,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text(
+                      "Welcome to Political Poster App",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,8 +59,8 @@ class _PhonePageState extends State<PhonePage> {
                   const Text(
                     "Mobile number",
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   TextFormField(
@@ -106,9 +126,7 @@ class _PhonePageState extends State<PhonePage> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const Spacer()
             ],
           ),
         ),

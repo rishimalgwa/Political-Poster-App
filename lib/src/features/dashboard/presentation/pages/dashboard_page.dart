@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,19 +38,40 @@ class _DashboardPageState extends State<DashboardPage> {
       WidgetsToImageController();
   late UserModel userModel;
   Future<void> _handleDownload(BuildContext context) async {
-    await Permission.photos.onDeniedCallback(() {
-      ScaffoldMessenger.of(context).showSnackBar(
-        errorSnackbar("Permission Denied"),
-      );
-    }).onGrantedCallback(() async {
-      final image = await widgetsToImageController.capture();
-      if (image == null) return;
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        /// use [Permissions.storage.status]
+        await Permission.storage.onDeniedCallback(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            errorSnackbar("Permission Denied"),
+          );
+        }).onGrantedCallback(() async {
+          final image = await widgetsToImageController.capture();
+          if (image == null) return;
 
-      await ImageGallerySaver.saveImage(image);
-      ScaffoldMessenger.of(context).showSnackBar(
-        successSnackbar("Downloaded Successfully"),
-      );
-    }).request();
+          await ImageGallerySaver.saveImage(image);
+          ScaffoldMessenger.of(context).showSnackBar(
+            successSnackbar("Downloaded Successfully"),
+          );
+        }).request();
+      } else {
+        /// use [Permissions.photos.status]
+        await Permission.photos.onDeniedCallback(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            errorSnackbar("Permission Denied"),
+          );
+        }).onGrantedCallback(() async {
+          final image = await widgetsToImageController.capture();
+          if (image == null) return;
+
+          await ImageGallerySaver.saveImage(image);
+          ScaffoldMessenger.of(context).showSnackBar(
+            successSnackbar("Downloaded Successfully"),
+          );
+        }).request();
+      }
+    }
   }
 
 // Handle share action
@@ -169,7 +191,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             width: 10,
                           ),
                           Image(
-                            image: AssetImage(userModel.photoUrl),
+                            image: FileImage(File(userModel.photoUrl)),
                             width: 100,
                             height: 100,
                           ),

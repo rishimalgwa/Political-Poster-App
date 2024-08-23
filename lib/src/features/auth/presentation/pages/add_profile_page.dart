@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:political_poster_app/src/common/widgets/button.dart';
 import 'package:political_poster_app/src/common/widgets/loading_widget.dart';
 import 'package:political_poster_app/src/common/widgets/snackbar.dart';
@@ -28,13 +30,43 @@ class _AddProfilePageState extends State<AddProfilePage> {
   String? _imagePath;
 
   Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        /// use [Permissions.storage.status]
+        await Permission.storage.onDeniedCallback(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            errorSnackbar("Permission Denied"),
+          );
+          return;
+        }).onGrantedCallback(() async {
+          final pickedFile =
+              await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        _imagePath = pickedFile.path;
-      });
+          if (pickedFile != null) {
+            setState(() {
+              _imagePath = pickedFile.path;
+            });
+          }
+        }).request();
+      } else {
+        /// use [Permissions.photos.status]
+        await Permission.photos.onDeniedCallback(() {
+          ScaffoldMessenger.of(context).showSnackBar(
+            errorSnackbar("Permission Denied"),
+          );
+          return;
+        }).onGrantedCallback(() async {
+          final pickedFile =
+              await ImagePicker().pickImage(source: ImageSource.gallery);
+
+          if (pickedFile != null) {
+            setState(() {
+              _imagePath = pickedFile.path;
+            });
+          }
+        }).request();
+      }
     }
   }
 
@@ -43,6 +75,18 @@ class _AddProfilePageState extends State<AddProfilePage> {
       return '$fieldName cannot be empty';
     }
     return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // handlePermissions();
+  }
+
+  Future<void> handlePermissions() async {
+    await Permission.storage.request();
+    await Permission.manageExternalStorage.request();
+    await Permission.accessMediaLocation.request();
   }
 
   @override

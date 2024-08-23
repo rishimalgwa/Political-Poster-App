@@ -10,6 +10,7 @@ dependencies:
   auto_route: ^8.1.4
   bloc: ^8.1.4
   dartz: ^0.10.1
+  device_info_plus: ^10.1.2
   equatable: ^2.0.5
   flutter:
     sdk: flutter
@@ -47,3 +48,4 @@ flutter:
   assets:
     - assets/
     - assets/posters/
+    - assets/images/
